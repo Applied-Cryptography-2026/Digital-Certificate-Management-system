@@ -5,6 +5,7 @@ export const ENDPOINTS = {
   LOGIN: '/auth/login',
   REGISTER: '/auth/register',
   PASSWORD: '/auth/password',
+  REVOKE: '/auth/refresh',
 
   // Keys
   KEYS: '/keys',
