@@ -8,6 +8,7 @@ import { validateEmail, validatePassword } from '../utils/validators'
 export default function Register() {
   const [formData, setFormData] = useState({
     username: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -24,12 +25,16 @@ export default function Register() {
     e.preventDefault()
     setError('')
 
+    if (!formData.username.trim()) {
+      setError('Username is required')
+      return
+    }
     if (!validateEmail(formData.email)) {
       setError('Please enter a valid email')
       return
     }
     if (!validatePassword(formData.password)) {
-      setError('Password must be at least 12 characters')
+      setError('Password must be at least 8 characters')
       return
     }
     if (formData.password !== formData.confirmPassword) {
@@ -41,12 +46,13 @@ export default function Register() {
     try {
       await authApi.register({
         username: formData.username,
+        name: formData.name,
         email: formData.email,
         password: formData.password,
       })
       navigate('/login')
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed')
+      setError(err.message || 'Registration failed')
     } finally {
       setLoading(false)
     }
@@ -70,12 +76,19 @@ export default function Register() {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
             <Input
-              label="Full Name"
+              label="Username"
               name="username"
-              placeholder="John Doe"
+              placeholder="johndoe"
               value={formData.username}
               onChange={handleChange}
               required
+            />
+            <Input
+              label="Full Name"
+              name="name"
+              placeholder="John Doe"
+              value={formData.name}
+              onChange={handleChange}
             />
             <Input
               label="Email Address"

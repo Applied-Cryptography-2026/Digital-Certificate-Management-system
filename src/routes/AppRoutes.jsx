@@ -14,6 +14,7 @@ import RootCAManagement from '../pages/admin/RootCAManagement'
 import CSRReviewQueue from '../pages/admin/CSRReviewQueue'
 import CertificateManagement from '../pages/admin/CertificateManagement'
 import RevocationQueue from '../pages/admin/RevocationQueue'
+import CRLManagement from '../pages/admin/CRLManagement'
 import AuditLogs from '../pages/admin/AuditLogs'
 
 // Customer Pages
@@ -48,16 +49,17 @@ export default function AppRoutes() {
       <Route path="/crl" element={<CRLLookup />} />
 
       {/* Admin Routes */}
-      <Route path="/admin" element={<PrivateRoute requiredRole="ADMIN"><AdminDashboard /></PrivateRoute>} />
-      <Route path="/admin/config" element={<PrivateRoute requiredRole="ADMIN"><SystemConfig /></PrivateRoute>} />
-      <Route path="/admin/root-ca" element={<PrivateRoute requiredRole="ADMIN"><RootCAManagement /></PrivateRoute>} />
-      <Route path="/admin/csr" element={<PrivateRoute requiredRole="ADMIN"><CSRReviewQueue /></PrivateRoute>} />
-      <Route path="/admin/certificates" element={<PrivateRoute requiredRole="ADMIN"><CertificateManagement /></PrivateRoute>} />
-      <Route path="/admin/revocations" element={<PrivateRoute requiredRole="ADMIN"><RevocationQueue /></PrivateRoute>} />
-      <Route path="/admin/logs" element={<PrivateRoute requiredRole="ADMIN"><AuditLogs /></PrivateRoute>} />
+      <Route path="/admin" element={<PrivateRoute requiredRole="admin"><AdminDashboard /></PrivateRoute>} />
+      <Route path="/admin/config" element={<PrivateRoute requiredRole="admin"><SystemConfig /></PrivateRoute>} />
+      <Route path="/admin/root-ca" element={<PrivateRoute requiredRole="admin"><RootCAManagement /></PrivateRoute>} />
+      <Route path="/admin/csr" element={<PrivateRoute requiredRole="admin"><CSRReviewQueue /></PrivateRoute>} />
+      <Route path="/admin/certificates" element={<PrivateRoute requiredRole="admin"><CertificateManagement /></PrivateRoute>} />
+      <Route path="/admin/revocations" element={<PrivateRoute requiredRole="admin"><RevocationQueue /></PrivateRoute>} />
+      <Route path="/admin/crl" element={<PrivateRoute requiredRole="admin"><CRLManagement /></PrivateRoute>} />
+      <Route path="/admin/logs" element={<PrivateRoute requiredRole="admin"><AuditLogs /></PrivateRoute>} />
 
       {/* Customer Routes */}
-      <Route path="/dashboard" element={<PrivateRoute requiredRole="CUSTOMER"><CustomerDashboard /></PrivateRoute>} />
+      <Route path="/dashboard" element={<PrivateRoute requiredRole="customer"><CustomerDashboard /></PrivateRoute>} />
       <Route path="/keys" element={<PrivateRoute><KeyPairs /></PrivateRoute>} />
       <Route path="/csr" element={<PrivateRoute><CSRSubmission /></PrivateRoute>} />
       <Route path="/certificates" element={<PrivateRoute><MyCertificates /></PrivateRoute>} />

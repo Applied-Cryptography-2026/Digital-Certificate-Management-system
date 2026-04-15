@@ -1,60 +1,67 @@
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api'
+// Backend server (swagger.yaml server: http://localhost:8080)
+// Paths are relative: /auth/login, /admin/csrs, etc. — no /api prefix
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
+// Endpoints must match swagger.yaml paths exactly
 export const ENDPOINTS = {
-  // Auth
-  LOGIN: '/auth/login',
-  REGISTER: '/auth/register',
-  PASSWORD: '/auth/password',
+  // === Auth ===
+  AUTH_REGISTER: '/auth/register',
+  AUTH_LOGIN: '/auth/login',
+  AUTH_REFRESH: '/auth/refresh',
+  ADMIN_LOGIN: '/admin/login',
+  ADMIN_REFRESH: '/admin/refresh',
 
-  // Keys
-  KEYS: '/keys',
-  GENERATE_KEY: '/keys/generate',
+  // === Customer ===
+  CUSTOMER_LOGOUT: '/customer/logout',
+  CUSTOMER_CSRS: '/customer/csrs',
+  CUSTOMER_CSR_BY_ID: (id) => `/customer/csrs/${id}`,
+  CUSTOMER_CSR_DOWNLOAD: (id) => `/customer/csrs/${id}/download`,
+  CUSTOMER_CERTS: '/customer/certificates',
+  CUSTOMER_CERT_BY_ID: (id) => `/customer/certificates/${id}`,
+  CUSTOMER_CERT_DOWNLOAD: (id) => `/customer/certificates/${id}/download`,
 
-  // CSR
-  CSRS: '/csr',
-  CSR_BY_ID: (id) => `/csr/${id}`,
-
-  // Certificates
-  CERTIFICATES: '/certificates',
-  CERTIFICATE_BY_ID: (id) => `/certificates/${id}`,
-  CERTIFICATE_DOWNLOAD: (id) => `/certificates/${id}/download`,
-  CERTIFICATE_REVOKE_REQUEST: (id) => `/certificates/${id}/revoke-request`,
-  CERTIFICATE_UPLOAD: '/certificates/upload',
-  UPLOADED_CERTS: '/certificates/uploaded',
-
-  // Admin - Config
-  ADMIN_CONFIG: '/admin/config',
-
-  // Admin - Root CA
-  ADMIN_ROOT_CA: '/admin/root-ca',
-  ADMIN_ROOT_CA_KEYPAIR: '/admin/root-ca/keypair',
-  ADMIN_ROOT_CA_CERT: '/admin/root-ca/certificate',
-
-  // Admin - CSR
-  ADMIN_CSRS: '/admin/csr',
-  ADMIN_CSR_APPROVE: (id) => `/admin/csr/${id}/approve`,
-  ADMIN_CSR_REJECT: (id) => `/admin/csr/${id}/reject`,
-
-  // Admin - Certificates
-  ADMIN_CERTIFICATES: '/admin/certificates',
+  // === Admin ===
+  ADMIN_CHANGE_PASSWORD: '/admin/change-password',
+  ADMIN_CSRS: '/admin/csrs',
+  ADMIN_CSR_BY_ID: (id) => `/admin/csrs/${id}`,
+  ADMIN_CSR_APPROVE: (id) => `/admin/csrs/${id}/approve`,
+  ADMIN_CSR_REJECT: (id) => `/admin/csrs/${id}/reject`,
+  ADMIN_CSR_DOWNLOAD: (id) => `/admin/csrs/${id}/download`,
+  ADMIN_CERTS: '/admin/certificates',
+  ADMIN_CERT_BY_ID: (id) => `/admin/certificates/${id}`,
+  ADMIN_CERT_DOWNLOAD: (id) => `/admin/certificates/${id}/download`,
   ADMIN_CERT_REVOKE: (id) => `/admin/certificates/${id}/revoke`,
-  ADMIN_CERT_RENEW: (id) => `/admin/certificates/${id}/renew`,
+  ADMIN_CERT_EXPIRING: '/admin/certificates/expiring',
+  ADMIN_CERT_VALIDATE: '/admin/certificates/validate',
 
-  // Admin - Revocations
-  ADMIN_REVOCATIONS: '/admin/revocation-requests',
-  ADMIN_REVOCATION_APPROVE: (id) => `/admin/revocation-requests/${id}/approve`,
-  ADMIN_REVOCATION_REJECT: (id) => `/admin/revocation-requests/${id}/reject`,
+  // === Root CA ===
+  ROOT_CA: '/admin/root-ca',
+  ROOT_CA_CERT_PEM: '/admin/root-ca/cert.pem',
+  ROOT_CA_KEY_PEM: '/admin/root-ca/key.pem',
+  ROOT_CA_GENERATE: '/admin/root-ca/generate',
+  ROOT_CA_TEST: '/admin/root-ca/test',
 
-  // Admin - Logs
-  ADMIN_LOGS: '/admin/logs',
+  // === Customer Key Pairs ===
+  KEY_PAIRS: '/customer/key-pairs',
+  KEY_PAIR_BY_ID: (id) => `/customer/key-pairs/${id}`,
+  KEY_PAIR_KEY_PEM: (id) => `/customer/key-pairs/${id}/key.pem`,
 
-  // Public
-  CRL: '/crl',
+  // === Revocation Requests ===
+  CUSTOMER_REVOCATIONS: '/customer/revocations',
+  CUSTOMER_REVOCATION_BY_ID: (id) => `/customer/revocations/${id}`,
+  ADMIN_REVOCATIONS: '/admin/revocations',
+  ADMIN_REVOCATION_APPROVE: (id) => `/admin/revocations/${id}/approve`,
+  ADMIN_REVOCATION_REJECT: (id) => `/admin/revocations/${id}/reject`,
+  ADMIN_REVOCATION_REVOKE: (id) => `/admin/revocations/${id}/revoke`,
+
+  // === CRL ===
+  ADMIN_CRL_REVOKED: '/admin/crl/revoked',
+  ADMIN_CRL_GENERATE: '/admin/crl/generate',
 }
 
 export const ROLES = {
-  ADMIN: 'ADMIN',
-  CUSTOMER: 'CUSTOMER',
+  ADMIN: 'admin',
+  CUSTOMER: 'customer',
 }
 
 export const CERTIFICATE_STATUS = {

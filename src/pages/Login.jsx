@@ -3,11 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ShieldCheck, Lock, FileCheck, Activity } from 'lucide-react'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
-import { authApi } from '../api'
+import { authApi, adminAuthApi } from '../api'
 import { useAuth } from '../context/AuthContext'
 
 export default function Login() {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -18,24 +18,30 @@ export default function Login() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    // Dummy account
+
+    // 1. Try admin login first (most likely use case for this login form)
     try {
-      if (email === 'admin@test.com') {
-        login('dummy-admin-token', { id: 1, email, role: 'ADMIN', name: 'Admin User' })
-        navigate('/admin')
-        return;
-      }
-      if (email === 'customer@test.com') {
-        login('dummy-customer-token', { id: 2, email, role: 'CUSTOMER', name: 'Customer User' })
-        navigate('/dashboard')
-        return;
-      }
-      //Dummy account
-      const { data } = await authApi.login({ email, password })
-      login(data.token, data.user)
-      navigate(data.user.role === 'ADMIN' ? '/admin' : '/dashboard')
-    } catch (err) {
-      setError(err.response?.data?.message || 'Invalid credentials')
+      const { data } = await adminAuthApi.login({ username, password })
+      login(data.access_token, data.user)
+      navigate('/admin', { replace: true })
+      return
+    } catch (adminErr) {
+      // admin login failed — expected for customer accounts, try customer login
+    }
+
+    // 2. Try customer login
+    try {
+      const { data } = await authApi.login({ username, password })
+      login(data.access_token, data.user)
+      navigate('/dashboard', { replace: true })
+      return
+    } catch (custErr) {
+      // Both failed — show error (prefer customer error message)
+      const msg =
+        custErr.message ||
+        (adminErr && adminErr.message) ||
+        'Invalid credentials'
+      setError(msg)
     } finally {
       setLoading(false)
     }
@@ -61,11 +67,11 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <Input
-              label="Email"
-              type="email"
-              placeholder="you@company.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              label="Username"
+              type="text"
+              placeholder="your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
             <Input
@@ -81,14 +87,6 @@ export default function Login() {
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
-
-          <div className="mt-2 p-4 border border-surface-light rounded-sm bg-surface">
-            <p className="text-xs font-mono text-lime-accent mb-2">Testing Accounts:</p>
-            <div className="text-xs font-mono text-text-tertiary flex flex-col gap-1">
-              <div><span className="text-text-primary">Admin:</span> admin@test.com (any pwd)</div>
-              <div><span className="text-text-primary">Customer:</span> customer@test.com (any pwd)</div>
-            </div>
-          </div>
 
           <p className="text-xs font-mono text-text-tertiary text-center mt-2">
             Don't have an account?{' '}
@@ -114,22 +112,19 @@ export default function Login() {
             <div className="flex flex-col items-center gap-2">
               <Lock className="w-6 h-6 text-lime-accent" />
               <p className="text-[11px] font-mono text-text-tertiary text-center w-20">
-                AES-256
-                <br />Encryption
+                AES-256<br />Encryption
               </p>
             </div>
             <div className="flex flex-col items-center gap-2">
               <FileCheck className="w-6 h-6 text-lime-accent" />
               <p className="text-[11px] font-mono text-text-tertiary text-center w-20">
-                X.509
-                <br />Compliant
+                X.509<br />Compliant
               </p>
             </div>
             <div className="flex flex-col items-center gap-2">
-              <Activity className="w-6 h-6 text-lime-accent" />
+              <ShieldCheck className="w-6 h-6 text-lime-accent" />
               <p className="text-[11px] font-mono text-text-tertiary text-center w-20">
-                Full Audit
-                <br />Trail
+                Full Audit<br />Trail
               </p>
             </div>
           </div>

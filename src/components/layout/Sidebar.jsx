@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import {
   LayoutDashboard, Settings, Award, FileText, BadgeCheck,
-  ShieldX, ScrollText, Key, Upload, LogOut, Menu, X
+  ShieldX, ScrollText, Key, Upload, LogOut, Menu, X, FileSignature,
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
 import { useState } from 'react'
@@ -14,6 +14,7 @@ const adminNav = [
   { to: '/admin/csr', icon: FileText, label: 'CSR Requests' },
   { to: '/admin/certificates', icon: BadgeCheck, label: 'Certificates' },
   { to: '/admin/revocations', icon: ShieldX, label: 'Revocations' },
+  { to: '/admin/crl', icon: FileSignature, label: 'CRL' },
   { to: '/admin/logs', icon: ScrollText, label: 'Audit Logs' },
 ]
 
