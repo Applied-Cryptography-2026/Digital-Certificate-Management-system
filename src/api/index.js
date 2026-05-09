@@ -11,16 +11,13 @@
  * Errors are propagated with the full axios error object.
  */
 
-import api from './client'
-import {
-  API_BASE_URL,
-  ENDPOINTS,
-} from '../utils/constants'
+import api from "./client";
+import { API_BASE_URL, ENDPOINTS } from "../utils/constants";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 /** Wrap a successful axios response into { data } for convenience */
-const ok = (res) => ({ data: res.data, status: res.status })
+const ok = (res) => ({ data: res.data, status: res.status });
 
 /** Throw normalised error so callers always get { message, status, data } */
 const err = (axiosError) => {
@@ -28,17 +25,27 @@ const err = (axiosError) => {
     axiosError.response?.data?.error ||
     axiosError.response?.data?.message ||
     axiosError.message ||
-    'Unknown error'
-  const status = axiosError.response?.status || 0
-  const data = axiosError.response?.data
-  return Promise.reject({ message, status, data })
-}
+    "Unknown error";
+  const status = axiosError.response?.status || 0;
+  const data = axiosError.response?.data;
+  return Promise.reject({ message, status, data });
+};
 
 /** Short-hand GET / POST / DELETE wrappers */
-const get  = (url, params) => api.get(url, { params }).then(ok).catch(err)
+const get = (url, params) => api.get(url, { params }).then(ok).catch(err);
 const post = (url, data, params) =>
-  api.post(url, data, { params }).then(ok).catch(err)
-const del  = (url) => api.delete(url).then(ok).catch(err)
+  api.post(url, data, { params }).then(ok).catch(err);
+const del = (url) => api.delete(url).then(ok).catch(err);
+
+// ── Audit Logs API ─────────────────────────────────────────────────────────────
+
+export const auditApi = {
+  /**
+   * GET /admin/audit-logs
+   * @param {{ startDate?, endDate? }} params
+   */
+  getAuditLogs: (params) => get(ENDPOINTS.ADMIN_AUDIT_LOGS, params),
+};
 
 // ── Auth API ─────────────────────────────────────────────────────────────────
 
@@ -47,23 +54,20 @@ export const authApi = {
    * POST /auth/register
    * @param {{ username, password, name?, email? }} body
    */
-  register: (body) =>
-    post(ENDPOINTS.AUTH_REGISTER, body),
+  register: (body) => post(ENDPOINTS.AUTH_REGISTER, body),
 
   /**
    * POST /auth/login
    * @param {{ username, password }} body
    * @returns {{ data: { access_token, expires_in } }}
    */
-  login: (body) =>
-    post(ENDPOINTS.AUTH_LOGIN, body),
+  login: (body) => post(ENDPOINTS.AUTH_LOGIN, body),
 
   /**
    * POST /auth/refresh — refresh customer access token
    */
-  refreshToken: () =>
-    post(ENDPOINTS.AUTH_REFRESH),
-}
+  refreshToken: () => post(ENDPOINTS.AUTH_REFRESH),
+};
 
 // ── Admin Auth API ───────────────────────────────────────────────────────────
 
@@ -73,15 +77,13 @@ export const adminAuthApi = {
    * @param {{ username, password }} body
    * @returns {{ data: { access_token, expires_in } }}
    */
-  login: (body) =>
-    post(ENDPOINTS.ADMIN_LOGIN, body),
+  login: (body) => post(ENDPOINTS.ADMIN_LOGIN, body),
 
   /**
    * POST /admin/refresh — refresh admin access token
    */
-  refreshToken: () =>
-    post(ENDPOINTS.ADMIN_REFRESH),
-}
+  refreshToken: () => post(ENDPOINTS.ADMIN_REFRESH),
+};
 
 // ── Customer API ────────────────────────────────────────────────────────────
 
@@ -89,8 +91,7 @@ export const customerApi = {
   /**
    * POST /customer/logout
    */
-  logout: () =>
-    post(ENDPOINTS.CUSTOMER_LOGOUT),
+  logout: () => post(ENDPOINTS.CUSTOMER_LOGOUT),
 
   // ── CSRs ────────────────────────────────────────────────────────────────
 
@@ -99,35 +100,32 @@ export const customerApi = {
    * @param {{ common_name, key_pair_id, dns_names?, ip_addresses? }} body
    *   key_pair_id is required (ID of a customer-owned key pair)
    */
-  submitCSR: (body) =>
-    post(ENDPOINTS.CUSTOMER_CSRS, body),
+  submitCSR: (body) => post(ENDPOINTS.CUSTOMER_CSRS, body),
 
   /**
    * GET /customer/csrs — list current customer's CSRs
    */
-  listCSRs: () =>
-    get(ENDPOINTS.CUSTOMER_CSRS),
+  listCSRs: () => get(ENDPOINTS.CUSTOMER_CSRS),
 
   /**
    * GET /customer/csrs/{id}
    * @param {number} id
    */
-  getCSR: (id) =>
-    get(ENDPOINTS.CUSTOMER_CSR_BY_ID(id)),
+  getCSR: (id) => get(ENDPOINTS.CUSTOMER_CSR_BY_ID(id)),
 
   /**
    * GET /customer/csrs/{id}/download — download CSR PEM file
    * @param {number} id
    */
   downloadCSR: (id) => {
-    const token = localStorage.getItem('token')
-    const url = API_BASE_URL + ENDPOINTS.CUSTOMER_CSR_DOWNLOAD(id)
+    const token = localStorage.getItem("token");
+    const url = API_BASE_URL + ENDPOINTS.CUSTOMER_CSR_DOWNLOAD(id);
     return fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
     }).then((res) => {
-      if (!res.ok) throw new Error('Failed to download CSR')
-      return res.blob()
-    })
+      if (!res.ok) throw new Error("Failed to download CSR");
+      return res.blob();
+    });
   },
 
   // ── Certificates ─────────────────────────────────────────────────────────
@@ -135,29 +133,27 @@ export const customerApi = {
   /**
    * GET /customer/certificates — list current customer's certificates
    */
-  listCertificates: () =>
-    get(ENDPOINTS.CUSTOMER_CERTS),
+  listCertificates: () => get(ENDPOINTS.CUSTOMER_CERTS),
 
   /**
    * GET /customer/certificates/{id}
    * @param {number} id
    */
-  getCertificate: (id) =>
-    get(ENDPOINTS.CUSTOMER_CERT_BY_ID(id)),
+  getCertificate: (id) => get(ENDPOINTS.CUSTOMER_CERT_BY_ID(id)),
 
   /**
    * GET /customer/certificates/{id}/download — download cert PEM file
    * @param {number} id
    */
   downloadCertificate: (id) => {
-    const token = localStorage.getItem('token')
-    const url = API_BASE_URL + ENDPOINTS.CUSTOMER_CERT_DOWNLOAD(id)
+    const token = localStorage.getItem("token");
+    const url = API_BASE_URL + ENDPOINTS.CUSTOMER_CERT_DOWNLOAD(id);
     return fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
     }).then((res) => {
-      if (!res.ok) throw new Error('Failed to download certificate')
-      return res.blob()
-    })
+      if (!res.ok) throw new Error("Failed to download certificate");
+      return res.blob();
+    });
   },
 
   // ── Revocation Requests ─────────────────────────────────────────────────
@@ -165,23 +161,20 @@ export const customerApi = {
   /**
    * GET /customer/revocations — list my revocation requests
    */
-  listRevocations: () =>
-    get(ENDPOINTS.CUSTOMER_REVOCATIONS),
+  listRevocations: () => get(ENDPOINTS.CUSTOMER_REVOCATIONS),
 
   /**
    * POST /customer/revocations — submit a revocation request
    * @param {{ certificate_id, reason }} body
    */
-  submitRevocation: (body) =>
-    post(ENDPOINTS.CUSTOMER_REVOCATIONS, body),
+  submitRevocation: (body) => post(ENDPOINTS.CUSTOMER_REVOCATIONS, body),
 
   /**
    * DELETE /customer/revocations/:id — cancel my pending revocation request
    * @param {number} id
    */
-  cancelRevocation: (id) =>
-    del(ENDPOINTS.CUSTOMER_REVOCATION_BY_ID(id)),
-}
+  cancelRevocation: (id) => del(ENDPOINTS.CUSTOMER_REVOCATION_BY_ID(id)),
+};
 
 // ── Admin API ───────────────────────────────────────────────────────────────
 
@@ -190,8 +183,7 @@ export const adminApi = {
    * POST /admin/change-password
    * @param {{ current_password, new_password }} body
    */
-  changePassword: (body) =>
-    post(ENDPOINTS.ADMIN_CHANGE_PASSWORD, body),
+  changePassword: (body) => post(ENDPOINTS.ADMIN_CHANGE_PASSWORD, body),
 
   // ── CSRs ──────────────────────────────────────────────────────────────────
 
@@ -199,45 +191,41 @@ export const adminApi = {
    * GET /admin/csrs — list all CSRs, optionally filtered by status
    * @param {'pending'|'approved'|'rejected'} [status]
    */
-  listCSRs: (status) =>
-    get(ENDPOINTS.ADMIN_CSRS, status ? { status } : {}),
+  listCSRs: (status) => get(ENDPOINTS.ADMIN_CSRS, status ? { status } : {}),
 
   /**
    * GET /admin/csrs/{id}
    * @param {number} id
    */
-  getCSR: (id) =>
-    get(ENDPOINTS.ADMIN_CSR_BY_ID(id)),
+  getCSR: (id) => get(ENDPOINTS.ADMIN_CSR_BY_ID(id)),
 
   /**
    * POST /admin/csrs/{id}/approve — approve CSR and issue certificate
    * @param {number} id
    * @param {{ approver_id?: number }} [body]
    */
-  approveCSR: (id, body = {}) =>
-    post(ENDPOINTS.ADMIN_CSR_APPROVE(id), body),
+  approveCSR: (id, body = {}) => post(ENDPOINTS.ADMIN_CSR_APPROVE(id), body),
 
   /**
    * POST /admin/csrs/{id}/reject — reject a CSR
    * @param {number} id
    * @param {{ notes?: string }} [body]
    */
-  rejectCSR: (id, body = {}) =>
-    post(ENDPOINTS.ADMIN_CSR_REJECT(id), body),
+  rejectCSR: (id, body = {}) => post(ENDPOINTS.ADMIN_CSR_REJECT(id), body),
 
   /**
    * GET /admin/csrs/{id}/download — download CSR PEM file
    * @param {number} id
    */
   downloadCSR: (id) => {
-    const token = localStorage.getItem('token')
-    const url = API_BASE_URL + ENDPOINTS.ADMIN_CSR_DOWNLOAD(id)
+    const token = localStorage.getItem("token");
+    const url = API_BASE_URL + ENDPOINTS.ADMIN_CSR_DOWNLOAD(id);
     return fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
     }).then((res) => {
-      if (!res.ok) throw new Error('Failed to download CSR')
-      return res.blob()
-    })
+      if (!res.ok) throw new Error("Failed to download CSR");
+      return res.blob();
+    });
   },
 
   // ── Certificates ──────────────────────────────────────────────────────────
@@ -245,43 +233,39 @@ export const adminApi = {
   /**
    * GET /admin/certificates — list all certificates
    */
-  listCertificates: () =>
-    get(ENDPOINTS.ADMIN_CERTS),
+  listCertificates: () => get(ENDPOINTS.ADMIN_CERTS),
 
   /**
    * POST /admin/certificates — import a certificate (PEM)
    * @param {{ cert_pem, key_pem }} body
    */
-  importCertificate: (body) =>
-    post(ENDPOINTS.ADMIN_CERTS, body),
+  importCertificate: (body) => post(ENDPOINTS.ADMIN_CERTS, body),
 
   /**
    * GET /admin/certificates/{id}
    * @param {number} id
    */
-  getCertificate: (id) =>
-    get(ENDPOINTS.ADMIN_CERT_BY_ID(id)),
+  getCertificate: (id) => get(ENDPOINTS.ADMIN_CERT_BY_ID(id)),
 
   /**
    * DELETE /admin/certificates/{id} — soft-delete a certificate
    * @param {number} id
    */
-  deleteCertificate: (id) =>
-    del(ENDPOINTS.ADMIN_CERT_BY_ID(id)),
+  deleteCertificate: (id) => del(ENDPOINTS.ADMIN_CERT_BY_ID(id)),
 
   /**
    * GET /admin/certificates/{id}/download — download cert PEM file
    * @param {number} id
    */
   downloadCertificate: (id) => {
-    const token = localStorage.getItem('token')
-    const url = API_BASE_URL + ENDPOINTS.ADMIN_CERT_DOWNLOAD(id)
+    const token = localStorage.getItem("token");
+    const url = API_BASE_URL + ENDPOINTS.ADMIN_CERT_DOWNLOAD(id);
     return fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
     }).then((res) => {
-      if (!res.ok) throw new Error('Failed to download certificate')
-      return res.blob()
-    })
+      if (!res.ok) throw new Error("Failed to download certificate");
+      return res.blob();
+    });
   },
 
   /**
@@ -295,8 +279,7 @@ export const adminApi = {
    * POST /admin/certificates/validate — validate a PEM certificate
    * @param {{ cert_pem }} body
    */
-  validateCertificate: (body) =>
-    post(ENDPOINTS.ADMIN_CERT_VALIDATE, body),
+  validateCertificate: (body) => post(ENDPOINTS.ADMIN_CERT_VALIDATE, body),
 
   // ── Root CA ────────────────────────────────────────────────────────────
 
@@ -315,36 +298,36 @@ export const adminApi = {
    * GET /admin/root-ca/cert.pem — download the Root CA certificate PEM file
    */
   downloadCertPEM: async () => {
-    const token = localStorage.getItem('token')
-    const url = API_BASE_URL + ENDPOINTS.ROOT_CA_CERT_PEM
+    const token = localStorage.getItem("token");
+    const url = API_BASE_URL + ENDPOINTS.ROOT_CA_CERT_PEM;
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
-    })
-    if (!res.ok) throw new Error('Failed to download certificate')
-    const blob = await res.blob()
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    a.download = 'root-ca.crt'
-    a.click()
-    URL.revokeObjectURL(a.href)
+    });
+    if (!res.ok) throw new Error("Failed to download certificate");
+    const blob = await res.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "root-ca.crt";
+    a.click();
+    URL.revokeObjectURL(a.href);
   },
 
   /**
    * GET /admin/root-ca/key.pem — download the Root CA private key PEM file
    */
   downloadKeyPEM: async () => {
-    const token = localStorage.getItem('token')
-    const url = API_BASE_URL + ENDPOINTS.ROOT_CA_KEY_PEM
+    const token = localStorage.getItem("token");
+    const url = API_BASE_URL + ENDPOINTS.ROOT_CA_KEY_PEM;
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
-    })
-    if (!res.ok) throw new Error('Failed to download key')
-    const blob = await res.blob()
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    a.download = 'root-ca-key.pem'
-    a.click()
-    URL.revokeObjectURL(a.href)
+    });
+    if (!res.ok) throw new Error("Failed to download key");
+    const blob = await res.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "root-ca-key.pem";
+    a.click();
+    URL.revokeObjectURL(a.href);
   },
 
   /**
@@ -395,19 +378,19 @@ export const adminApi = {
    * GET /admin/crl/generate — download the CRL PEM file
    */
   downloadCRL: async () => {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem("token");
     const res = await fetch(API_BASE_URL + ENDPOINTS.ADMIN_CRL_GENERATE, {
       headers: { Authorization: `Bearer ${token}` },
-    })
-    if (!res.ok) throw new Error('Failed to generate CRL')
-    const blob = await res.blob()
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    a.download = `root-ca-${new Date().toISOString().slice(0, 10)}.crl.pem`
-    a.click()
-    URL.revokeObjectURL(a.href)
+    });
+    if (!res.ok) throw new Error("Failed to generate CRL");
+    const blob = await res.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `root-ca-${new Date().toISOString().slice(0, 10)}.crl.pem`;
+    a.click();
+    URL.revokeObjectURL(a.href);
   },
-}
+};
 
 // ── Public API ───────────────────────────────────────────────────────────────
 
@@ -416,16 +399,16 @@ export const publicApi = {
    * GET /admin/crl/generate — download the CRL (public endpoint for CRL distribution)
    */
   downloadCRL: async () => {
-    const res = await fetch(API_BASE_URL + ENDPOINTS.ADMIN_CRL_GENERATE)
-    if (!res.ok) throw new Error('Failed to download CRL')
-    const blob = await res.blob()
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    a.download = 'root-ca.crl.pem'
-    a.click()
-    URL.revokeObjectURL(a.href)
+    const res = await fetch(API_BASE_URL + ENDPOINTS.ADMIN_CRL_GENERATE);
+    if (!res.ok) throw new Error("Failed to download CRL");
+    const blob = await res.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "root-ca.crl.pem";
+    a.click();
+    URL.revokeObjectURL(a.href);
   },
-}
+};
 
 // ── Customer Key Pair API ────────────────────────────────────────────────────
 
@@ -459,13 +442,13 @@ export const keyPairApi = {
    * @param {number} id
    */
   downloadKeyPEM: (id) => {
-    const token = localStorage.getItem('token')
-    const url = API_BASE_URL + ENDPOINTS.KEY_PAIR_KEY_PEM(id)
+    const token = localStorage.getItem("token");
+    const url = API_BASE_URL + ENDPOINTS.KEY_PAIR_KEY_PEM(id);
     return fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
     }).then((res) => {
-      if (!res.ok) throw new Error('Failed to download private key')
-      return res.blob()
-    })
+      if (!res.ok) throw new Error("Failed to download private key");
+      return res.blob();
+    });
   },
-}
+};
